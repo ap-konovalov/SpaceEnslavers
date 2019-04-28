@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace SpaceEnslavers
 {
+    /// <summary>
+    /// Объект с фоновой картинкой
+    /// </summary>
     class Space : BaseObject
     {
         Image background = Image.FromFile(@"..\..\background.jpeg");

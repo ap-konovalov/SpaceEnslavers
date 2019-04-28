@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpaceEnslavers.Objects;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -13,6 +14,11 @@ namespace SpaceEnslavers
         public static int Width { get; set; }
         public static int Height { get; set; }
 
+        //переменная для снаряда
+        private static Bullet _bullet;
+        //массивчик с астероидами
+        private static Asteroid[] _asteroids;
+
         static Game()
         { 
         }
@@ -22,23 +28,35 @@ namespace SpaceEnslavers
         public static void Load()
         {
 
-            _objs = new BaseObject[40];
+            _objs = new BaseObject[30];
 
-            // нарисовали планету
-            _objs[1] = new Planet(new Point(20, 20), new Point(10, 10), new Size(5, 5), "Earth");
-            
-            // отрисовали фон
+            //нарисуем фон
             _objs[0] = new Space(new Point(0, 0), new Point(0, 0), new Size(5, 5));
 
-            // отрисовываем звезды 
-            for (int i = 2; i < _objs.Length/2; i++)
+            //нарисуем планету
+            _objs[1] = new Planet(new Point(20, 20), new Point(10, 10), new Size(5, 5), "Earth");
+
+            //нарисуем снаряд
+            _bullet = new Bullet(new Point(0, 200), new Point(5, 0), new Size(4, 1));
+
+            //Создадим астероиды
+            _asteroids = new Asteroid[3];
+
+            var rnd = new Random();
+
+            // нарисуем летающие звезды 
+            for (int i = 2; i < _objs.Length; i++)
             {
-                _objs[i] = new Star(new Point(0, i*20), new Point(-i, i), new Size(5, 5));
+                int random = rnd.Next(5, 50);
+                _objs[i] = new Star(new Point(20, rnd.Next(0, Game.Height)), new Point(-random, random), new Size(3, 3));
             }
 
-            //// рисуем кружки 
-            for (int i = _objs.Length / 2; i < _objs.Length ; i++)
-                _objs[i] = new BaseObject(new Point(0, i * 20), new Point(-i, -i), new Size(10, 10));
+            for (var i = 0; i < _asteroids.Length; i++)
+            {
+                int random = rnd.Next(5, 50);
+                _asteroids[i] = new Asteroid(new Point(100, rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+            }
+
         }
         internal static void Init(Form form)
         {
@@ -62,21 +80,41 @@ namespace SpaceEnslavers
         public static void Draw()
         {
             Buffer.Graphics.Clear(Color.Black);
+
+            // отрисовали фон звезды и планету
             foreach (BaseObject obj in _objs)
             {
                 obj.Draw();
             }
 
-            Buffer.Render();
+            // вызвали метод отрисовки для снаряда
+            _bullet.Draw();
 
+            //отрисовали все астероиды
+            foreach (Asteroid item in _asteroids)
+            {
+                item.Draw();
+            }
+
+            Buffer.Render();
         }
 
         public static void Update()
         {
+            // обновляем позицию фона звезд и планеты
             foreach (BaseObject obj in _objs)
             {
                 obj.Update();
             }
+
+            // обновляем позицию астероидов
+            foreach (Asteroid item in _asteroids)
+            {
+                item.Update();
+            }
+
+            //Обновляем позицию снаряда
+            _bullet.Update();
 
         }
 

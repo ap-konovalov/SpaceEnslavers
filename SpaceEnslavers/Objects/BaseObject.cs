@@ -10,7 +10,7 @@ namespace SpaceEnslavers
     /// <summary>
     /// Базовый обект, от которого будем наследовать остальные
     /// </summary>
-    class BaseObject
+    abstract class BaseObject
     {
         protected Point Position;
         protected Point Dir;
@@ -30,13 +30,10 @@ namespace SpaceEnslavers
         }
 
         /// <summary>
-        /// Отрисовка базового объекта
+        /// Отрисовка объекта будет реализована в классах-наследниках, здесь реализации нет, так как метод абстрактный
         /// </summary>
-        public virtual void Draw()
-        {
-            Game.Buffer.Graphics.DrawEllipse(Pens.White, Position.X, Position.Y, Size.Width, Size.Height);
-        }
-
+        public abstract void Draw();
+   
         /// <summary>
         /// Движение обекта
         /// </summary>
