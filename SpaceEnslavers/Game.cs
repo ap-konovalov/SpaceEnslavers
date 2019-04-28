@@ -24,10 +24,14 @@ namespace SpaceEnslavers
 
             _objs = new BaseObject[40];
 
-            _objs[0] = new Planet(new Point(20, 20), new Point(10, 10), new Size(5, 5), "Earth");
+            // нарисовали планету
+            _objs[1] = new Planet(new Point(20, 20), new Point(10, 10), new Size(5, 5), "Earth");
+            
+            // отрисовали фон
+            _objs[0] = new Space(new Point(0, 0), new Point(0, 0), new Size(5, 5));
 
             // отрисовываем звезды 
-            for (int i = 1; i < _objs.Length/2; i++)
+            for (int i = 2; i < _objs.Length/2; i++)
             {
                 _objs[i] = new Star(new Point(0, i*20), new Point(-i, i), new Size(5, 5));
             }
@@ -46,9 +50,6 @@ namespace SpaceEnslavers
 
             Width = form.ClientSize.Width;
             Height = form.ClientSize.Height;
-
-            //TODO 1: Написать путь к картинке и сделать фон не в форме а в игровом поле
-            form.BackgroundImage = Image.FromFile(@"C:\projects\SpaceEnslavers\SpaceEnslavers\background.jpeg");
 
             Buffer = _context.Allocate(g, new Rectangle(0, 0, Width, Height));
 
