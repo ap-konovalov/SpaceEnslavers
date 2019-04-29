@@ -13,11 +13,15 @@ namespace SpaceEnslavers
         [STAThread]
         static void Main()
         {
-            Form form = new Form();
-            form.Width = 800;
-            form.Height = 600;
+            Form form = new Form
+            {
+                //задаем высоту и ширину в половину от размера экрана
+                Width = Screen.PrimaryScreen.Bounds.Width /2,
+                Height = Screen.PrimaryScreen.Bounds.Height/2
+            };
             Game.Init(form);
             form.Show();
+            Game.Load();
             Game.Draw();
             Application.Run(form);
         }

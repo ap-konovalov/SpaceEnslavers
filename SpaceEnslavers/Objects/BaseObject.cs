@@ -37,19 +37,10 @@ namespace SpaceEnslavers
         /// Отрисовка объекта будет реализована в классах-наследниках, здесь реализации нет, так как метод абстрактный
         /// </summary>
         public abstract void Draw();
-   
+
         /// <summary>
         /// Движение обекта
         /// </summary>
-        public virtual void Update()
-        {
-            Position.X = Position.X + Dir.X;
-            Position.Y = Position.Y + Dir.Y;
-            if (Position.X < 0) Dir.X = -Dir.X;
-            if (Position.X > Game.Width) Dir.X = -Dir.X;
-            if (Position.Y < 0) Dir.Y = -Dir.Y;
-            if (Position.Y > Game.Height) Dir.Y = -Dir.Y;
-        }
-
+        public abstract void Update();
     }
 }

@@ -22,5 +22,9 @@ namespace SpaceEnslavers
         {
           Game.Buffer.Graphics.DrawImage(background, Position.X, Position.Y,800,600);
         }
+
+        public override void Update()
+        {
+        }
     }
 }
