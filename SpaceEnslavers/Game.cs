@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Media;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace SpaceEnslavers
 {
@@ -133,13 +134,28 @@ namespace SpaceEnslavers
             //Обновляем позицию снаряда
             _bullet.Update();
 
+            CheckScreenSize();
         }
-
 
         private static void Timer_Tick(object sender, EventArgs e)
         {
             Draw();
             Update();
+        }
+        
+        /// <summary>
+        /// Функция проверки размера игровой формы. Если размер формы < 0 или > 1000 по шиоине или высоте - выбрасывает исключение
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        private static void CheckScreenSize()
+        {
+            //получаем текущие размеры формы
+            int currentWidth = Form1.ActiveForm.Width;
+            int currntHeight = Form1.ActiveForm.Height;
+            //Если размер формы не соответствует заданным выбасываем исключение
+            if (currentWidth > 1000 || currentWidth < 0 || currntHeight > 1000 || currntHeight < 0)
+            {
+             throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
