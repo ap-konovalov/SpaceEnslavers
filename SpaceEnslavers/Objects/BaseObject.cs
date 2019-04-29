@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpaceEnslavers.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace SpaceEnslavers
     /// <summary>
     /// Базовый обект, от которого будем наследовать остальные
     /// </summary>
-    abstract class BaseObject
+    abstract class BaseObject: ICollision
     {
         protected Point Position;
         protected Point Dir;
@@ -29,6 +30,9 @@ namespace SpaceEnslavers
             Size = size;
         }
 
+        public bool Collision(ICollision obj) => obj.Rectangle.IntersectsWith(this.Rectangle);
+        public Rectangle Rectangle => new Rectangle(Position, Size);
+        
         /// <summary>
         /// Отрисовка объекта будет реализована в классах-наследниках, здесь реализации нет, так как метод абстрактный
         /// </summary>

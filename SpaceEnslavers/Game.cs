@@ -1,6 +1,7 @@
 ﻿using SpaceEnslavers.Objects;
 using System;
 using System.Drawing;
+using System.Media;
 using System.Windows.Forms;
 
 namespace SpaceEnslavers
@@ -108,9 +109,14 @@ namespace SpaceEnslavers
             }
 
             // обновляем позицию астероидов
-            foreach (Asteroid item in _asteroids)
+            foreach (Asteroid asteroid in _asteroids)
             {
-                item.Update();
+                asteroid.Update();
+                //если астероид столкнулся с выстрелом воспроизводим звук
+                if (asteroid.Collision(_bullet))
+                {
+                    SystemSounds.Hand.Play();
+                }
             }
 
             //Обновляем позицию снаряда

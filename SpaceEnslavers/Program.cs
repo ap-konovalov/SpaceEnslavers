@@ -20,7 +20,6 @@ namespace SpaceEnslavers
             form.Show();
             Game.Draw();
             Application.Run(form);
-
         }
     }
 }
