@@ -33,5 +33,11 @@ namespace SpaceEnslavers.Objects
             if (Position.Y < 0) Dir.Y = -Dir.Y;
             if (Position.Y > Game.Height) Dir.Y = -Dir.Y;
         }
+
+        public void Regeneration()
+        {
+            Game.Buffer.Graphics.FillEllipse(Brushes.White, Position.X, Position.Y, Size.Width, Size.Height);
+        }
+          
     }
 }

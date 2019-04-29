@@ -1,6 +1,8 @@
 ﻿using SpaceEnslavers.Objects;
 using System;
+using System.Collections;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Media;
 using System.Windows.Forms;
 
@@ -99,30 +101,40 @@ namespace SpaceEnslavers
 
             Buffer.Render();
         }
-
+        
+        
         public static void Update()
         {
+            var rnd = new Random();
             // обновляем позицию фона звезд и планеты
             foreach (BaseObject obj in _objs)
             {
                 obj.Update();
             }
-
+            
+            //нужно чтобы понимать с каким астероидом столкнулся снаряд и перересовать его
+            int currentAsteroid = 0;
             // обновляем позицию астероидов
             foreach (Asteroid asteroid in _asteroids)
             {
                 asteroid.Update();
+             
                 //если астероид столкнулся с выстрелом воспроизводим звук
                 if (asteroid.Collision(_bullet))
                 {
                     SystemSounds.Hand.Play();
+                    //вместо столкнувшегося астероида рисуем новый
+                    int random = rnd.Next(5, 50);
+                    _asteroids[currentAsteroid] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
                 }
+                currentAsteroid++;
             }
 
             //Обновляем позицию снаряда
             _bullet.Update();
 
         }
+
 
         private static void Timer_Tick(object sender, EventArgs e)
         {
