@@ -57,6 +57,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="Interfaces\ICollision.cs" />
     <Compile Include="Objects\Bullet.cs" />
+    <Compile Include="Objects\GameObjectException.cs" />
     <Compile Include="Objects\Planet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
