@@ -64,11 +64,7 @@ namespace SpaceEnslavers
     /// <summary>
     /// Собственное исключение при попытке  создать объект с : отрицательным размером, слишком большой скорость или неверной позицией)
     /// </summary>
-    class GameObjectException : Exception
+    partial class GameObjectException : Exception
     {
-        public GameObjectException(string message)
-        {
-            MessageBox.Show(message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
     }
 }
