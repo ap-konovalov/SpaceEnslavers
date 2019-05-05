@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace SpaceEnslavers
 {
+    /// <summary>
+    /// Объект с фоновой картинкой
+    /// </summary>
     class Space : BaseObject
     {
         Image background = Image.FromFile(@"..\..\background.jpeg");
@@ -18,6 +21,10 @@ namespace SpaceEnslavers
         public override void Draw()
         {
           Game.Buffer.Graphics.DrawImage(background, Position.X, Position.Y,800,600);
+        }
+
+        public override void Update()
+        {
         }
     }
 }
