@@ -20,23 +20,26 @@ namespace SpaceEnslavers
 
         //переменная для снаряда
         private static Bullet _bullet;
+
         //массивчик с астероидами
         private static Asteroid[] _asteroids;
-        
+
         public static Timer _timer = new Timer();
         
+        //счетчик уничтоженных астероидов
+        public static int DestroyedAsteroids { get; set; } = 0;
+
         //Создаем космический корабль
-        private static Ship _ship = new Ship(new Point(10,400), new Point(5,5), new Size(10,10));
+        private static Ship _ship = new Ship(new Point(10, 400), new Point(5, 5), new Size(10, 10));
 
         static Game()
-        { 
+        {
         }
 
         public static BaseObject[] _objs;
 
         public static void Load()
         {
-
             _objs = new BaseObject[30];
 
             //нарисуем фон
@@ -50,23 +53,25 @@ namespace SpaceEnslavers
 
             //Создадим астероиды
             _asteroids = new Asteroid[3];
-            
+
             var rnd = new Random();
 
             // нарисуем летающие звезды 
             for (int i = 2; i < _objs.Length; i++)
             {
                 int random = rnd.Next(5, 50);
-                _objs[i] = new Star(new Point(20, rnd.Next(0, Game.Height)), new Point(-random, random), new Size(3, 3));
+                _objs[i] = new Star(new Point(20, rnd.Next(0, Game.Height)), new Point(-random, random),
+                    new Size(3, 3));
             }
 
             for (var i = 0; i < _asteroids.Length; i++)
             {
                 int random = rnd.Next(5, 50);
-                _asteroids[i] = new Asteroid(new Point(100, rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+                _asteroids[i] = new Asteroid(new Point(100, rnd.Next(0, Game.Height)), new Point(-random / 5, random),
+                    new Size(random, random));
             }
-
         }
+
         internal static void Init(Form form)
         {
             Graphics g;
@@ -104,14 +109,17 @@ namespace SpaceEnslavers
             //При нажатии Ctrl астероид выпускает снаряд
             if (e.KeyCode == Keys.ControlKey)
             {
-                _bullet = new Bullet(new Point(_ship.Rectangle.X + 10, _ship.Rectangle.Y + 4), new Point(4,0), new Size(4,1) );
+                _bullet = new Bullet(new Point(_ship.Rectangle.X + 10, _ship.Rectangle.Y + 4), new Point(4, 0),
+                    new Size(4, 1));
                 SystemSounds.Beep.Play();
             }
+
             //При нажатии стрелки вверх выполнился метод Up экземпляра класса ship
             if (e.KeyCode == Keys.Up)
             {
                 _ship.Up();
             }
+
             //При нажатии стрелки вниз выполнился метод Down экземпляра класса ship
             if (e.KeyCode == Keys.Down)
             {
@@ -137,22 +145,23 @@ namespace SpaceEnslavers
             {
                 item?.Draw();
             }
-            
+
             //отрисовали корабль
             _ship.Draw();
             //отрисовали здоровье корабля
             if (_ship != null)
             {
-                Buffer.Graphics.DrawString("Energy: " + _ship.Energy, SystemFonts.DefaultFont, Brushes.White, 850,20);
+                Buffer.Graphics.DrawString("Energy: " + _ship.Energy, SystemFonts.DefaultFont, Brushes.White, 800, 20);
+                Buffer.Graphics.DrawString("Asteroids: " + DestroyedAsteroids , SystemFonts.DefaultFont,
+                    Brushes.White, 800, 40);
             }
 
             Buffer.Render();
         }
-        
-        
+
+
         public static void Update()
         {
-          
             // обновляем позицию фона звезд и планеты
             foreach (BaseObject obj in _objs)
             {
@@ -162,20 +171,24 @@ namespace SpaceEnslavers
             for (var i = 0; i < _asteroids.Length; i++)
             {
                 var rnd = new Random();
-                
+
                 if (_asteroids[i] == null)
                 {
                     continue;
                 }
-                
+
                 _asteroids[i].Update();
-                
+
                 //Если снаряд попал в астероид рисуем новый рандомный астероид
                 if (_bullet != null && _bullet.Collision(_asteroids[i]))
                 {
                     SystemSounds.Hand.Play();
                     int random = rnd.Next(5, 50);
-                    _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+                    _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)),
+                        new Point(-random / 5, random), new Size(random, random));
+                    //добавим в счетчик астероидов сбитый астероид
+                   DestroyedAsteroids++;
+
                     //вызовем метод который вызовет событие гибели астероида на которое мы подпишемся
                     _asteroids[i].Die();
                     continue;
@@ -185,7 +198,7 @@ namespace SpaceEnslavers
                 {
                     continue;
                 }
-                
+
                 // при столкновении астероида с кораблем, вычитаем у корабля от 1 до 10 жизней
                 var damage = rnd.Next(1, 10);
                 _ship?.EnergyLow(damage);
@@ -196,6 +209,8 @@ namespace SpaceEnslavers
                 //если у коробля заканчиваются жизни он умирает
                 if (_ship.Energy <= 0)
                 {
+                    //когда корабль разбился, обнулим счетчик сбитых астероидов
+                   DestroyedAsteroids = 0 ;
                     _ship?.Die();
                 }
             }
@@ -211,7 +226,7 @@ namespace SpaceEnslavers
             Draw();
             Update();
         }
-        
+
         /// <summary>
         /// Функция проверки размера игровой формы. Если размер формы < 0 или > 1000 по шиоине или высоте - выбрасывает исключение
         /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -223,7 +238,7 @@ namespace SpaceEnslavers
             //Если размер формы не соответствует заданным выбасываем исключение
             if (currentWidth > 1000 || currentWidth < 0 || currntHeight > 1000 || currntHeight < 0)
             {
-             throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -234,7 +249,8 @@ namespace SpaceEnslavers
         {
             _timer.Stop();
             Console.WriteLine("Корабль уничтожен");
-            Buffer.Graphics.DrawString("THE END", new Font(FontFamily.GenericSansSerif, 60, FontStyle.Underline), Brushes.White, 300, 150);
+            Buffer.Graphics.DrawString("THE END", new Font(FontFamily.GenericSansSerif, 60, FontStyle.Underline),
+                Brushes.White, 300, 150);
             Buffer.Render();
         }
 

@@ -13,7 +13,8 @@ namespace SpaceEnslavers.Objects
     class Asteroid : BaseObject, ICloneable, Asteroid.IComparable<Asteroid>
     {
         public int Power { get; set; } = 3;
-
+        
+        // переменная для подсчета уничтоенных астероидов 
         public static event Message AsteroidDie;
 
         public Asteroid(Point pos, Point dir, Size size) : base(pos, dir, size)
