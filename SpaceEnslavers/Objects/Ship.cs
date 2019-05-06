@@ -1,4 +1,6 @@
+using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace SpaceEnslavers.Objects
 {
@@ -12,7 +14,7 @@ namespace SpaceEnslavers.Objects
 
         //Статическое событие гибели корабля
         public static event Message MessageDie;
-
+        
         public void EnergyLow(int n)
         {
             _energy -= n;
@@ -55,11 +57,15 @@ namespace SpaceEnslavers.Objects
                 Position.Y = Position.Y + Dir.Y;
             }
         }
-
         public void Die()
         {
-            //вызываем событие гибели корабля, т.е. делегат MessageDie
+            //вызываем событие гибели корабля
             MessageDie?.Invoke();
+        }
+
+        public void ShipDamageLog(int damage)
+        {
+            Console.WriteLine($"Снаряд попал в корабль: -{damage} здоровья. Осталось: {_energy - damage} жизней ");
         }
     }
 }

@@ -90,6 +90,8 @@ namespace SpaceEnslavers
             form.KeyDown += Form_KeyDown;
             // подписались на делегата MessageDie в классе Ship. Когда у корабля будет 0 жизней выховется метод Die в котором сработает событие MessageDie и мы выполним метод Finish 
             Ship.MessageDie += Finish;
+            //При возникновении события AsteroidDie выполнится метод AsteroidDieLog
+            Asteroid.AsteroidDie += AsteroidDieLog;
         }
 
         /// <summary>
@@ -174,6 +176,8 @@ namespace SpaceEnslavers
                     SystemSounds.Hand.Play();
                     int random = rnd.Next(5, 50);
                     _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+                    //вызовем метод который вызовет событие гибели астероида на которое мы подпишемся
+                    _asteroids[i].Die();
                     continue;
                 }
 
@@ -183,8 +187,11 @@ namespace SpaceEnslavers
                 }
                 
                 // при столкновении астероида с кораблем, вычитаем у корабля от 1 до 10 жизней
-                _ship?.EnergyLow(rnd.Next(1,10));
+                var damage = rnd.Next(1, 10);
+                _ship?.EnergyLow(damage);
                 SystemSounds.Asterisk.Play();
+                //занесем информацию о столкновении в консоль
+                _ship?.ShipDamageLog(damage);
 
                 //если у коробля заканчиваются жизни он умирает
                 if (_ship.Energy <= 0)
@@ -226,8 +233,15 @@ namespace SpaceEnslavers
         public static void Finish()
         {
             _timer.Stop();
+            Console.WriteLine("Корабль уничтожен");
             Buffer.Graphics.DrawString("THE END", new Font(FontFamily.GenericSansSerif, 60, FontStyle.Underline), Brushes.White, 300, 150);
             Buffer.Render();
+        }
+
+        //логируем в консоли гибель астероидов
+        public static void AsteroidDieLog()
+        {
+            Console.WriteLine("Астероид уничтожен");
         }
     }
 }

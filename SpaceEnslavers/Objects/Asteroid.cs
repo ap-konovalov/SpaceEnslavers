@@ -14,6 +14,8 @@ namespace SpaceEnslavers.Objects
     {
         public int Power { get; set; } = 3;
 
+        public static event Message AsteroidDie;
+
         public Asteroid(Point pos, Point dir, Size size) : base(pos, dir, size)
         {
             Power = 1;
@@ -75,6 +77,11 @@ namespace SpaceEnslavers.Objects
                 return -1;
             }
             return 0;
+        }
+
+        public void Die()
+        {
+            AsteroidDie?.Invoke();
         }
     }
 }
