@@ -29,7 +29,7 @@ namespace SpaceEnslavers.Objects
         /// </summary>
         public override void Update()
         {
-            Position.X = Position.X + 3;
+            Position.X = Position.X + 53;
         }
     }
 }

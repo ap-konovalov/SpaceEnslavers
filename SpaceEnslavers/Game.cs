@@ -22,6 +22,11 @@ namespace SpaceEnslavers
         private static Bullet _bullet;
         //массивчик с астероидами
         private static Asteroid[] _asteroids;
+        
+        public static Timer _timer = new Timer();
+        
+        //Создаем космический корабль
+        private static Ship _ship = new Ship(new Point(10,400), new Point(5,5), new Size(10,10));
 
         static Game()
         { 
@@ -45,7 +50,7 @@ namespace SpaceEnslavers
 
             //Создадим астероиды
             _asteroids = new Asteroid[3];
-
+            
             var rnd = new Random();
 
             // нарисуем летающие звезды 
@@ -77,10 +82,41 @@ namespace SpaceEnslavers
 
             Load();
 
-            Timer timer = new Timer { Interval = 100 };
-            timer.Start();
-            timer.Tick += Timer_Tick;
+            //Timer timer = new Timer { Interval = 100 };
+            _timer.Start();
+            _timer.Tick += Timer_Tick;
+
+            // Обработчик событий нажатия на кнопку, вызывающий при нажатии метод Form_KeyDown
+            form.KeyDown += Form_KeyDown;
+            // подписались на делегата MessageDie в классе Ship. Когда у корабля будет 0 жизней выховется метод Die в котором сработает событие MessageDie и мы выполним метод Finish 
+            Ship.MessageDie += Finish;
         }
+
+        /// <summary>
+        /// Метод обработки нажатий на кнопки, вызывается обработчиком событй и выполняет различные действия в зависимости от того, какая кнопка нажата
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Form_KeyDown(object sender, KeyEventArgs e)
+        {
+            //При нажатии Ctrl астероид выпускает снаряд
+            if (e.KeyCode == Keys.ControlKey)
+            {
+                _bullet = new Bullet(new Point(_ship.Rectangle.X + 10, _ship.Rectangle.Y + 4), new Point(4,0), new Size(4,1) );
+                SystemSounds.Beep.Play();
+            }
+            //При нажатии стрелки вверх выполнился метод Up экземпляра класса ship
+            if (e.KeyCode == Keys.Up)
+            {
+                _ship.Up();
+            }
+            //При нажатии стрелки вниз выполнился метод Down экземпляра класса ship
+            if (e.KeyCode == Keys.Down)
+            {
+                _ship.Down();
+            }
+        }
+
         public static void Draw()
         {
             Buffer.Graphics.Clear(Color.Black);
@@ -92,12 +128,20 @@ namespace SpaceEnslavers
             }
 
             // вызвали метод отрисовки для снаряда
-            _bullet.Draw();
+            _bullet?.Draw();
 
             //отрисовали все астероиды
             foreach (Asteroid item in _asteroids)
             {
-                item.Draw();
+                item?.Draw();
+            }
+            
+            //отрисовали корабль
+            _ship.Draw();
+            //отрисовали здоровье корабля
+            if (_ship != null)
+            {
+                Buffer.Graphics.DrawString("Energy: " + _ship.Energy, SystemFonts.DefaultFont, Brushes.White, 850,20);
             }
 
             Buffer.Render();
@@ -106,29 +150,47 @@ namespace SpaceEnslavers
         
         public static void Update()
         {
-            var rnd = new Random();
+          
             // обновляем позицию фона звезд и планеты
             foreach (BaseObject obj in _objs)
             {
                 obj.Update();
             }
-            
-            //нужно чтобы понимать с каким астероидом столкнулся снаряд и перересовать его
-            int currentAsteroid = 0;
-            // обновляем позицию астероидов
-            foreach (Asteroid asteroid in _asteroids)
+
+            for (var i = 0; i < _asteroids.Length; i++)
             {
-                asteroid.Update();
-             
-                //если астероид столкнулся с выстрелом воспроизводим звук
-                if (asteroid.Collision(_bullet))
+                var rnd = new Random();
+                
+                if (_asteroids[i] == null)
+                {
+                    continue;
+                }
+                
+                _asteroids[i].Update();
+                
+                //Если снаряд попал в астероид рисуем новый рандомный астероид
+                if (_bullet != null && _bullet.Collision(_asteroids[i]))
                 {
                     SystemSounds.Hand.Play();
-                    //вместо столкнувшегося астероида рисуем новый
                     int random = rnd.Next(5, 50);
-                    _asteroids[currentAsteroid] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+                    _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+                    continue;
                 }
-                currentAsteroid++;
+
+                if (!_ship.Collision(_asteroids[i]))
+                {
+                    continue;
+                }
+                
+                // при столкновении астероида с кораблем, вычитаем у корабля от 1 до 10 жизней
+                _ship?.EnergyLow(rnd.Next(1,10));
+                SystemSounds.Asterisk.Play();
+
+                //если у коробля заканчиваются жизни он умирает
+                if (_ship.Energy <= 0)
+                {
+                    _ship?.Die();
+                }
             }
 
             //Обновляем позицию снаряда
@@ -156,6 +218,16 @@ namespace SpaceEnslavers
             {
              throw new ArgumentOutOfRangeException();
             }
+        }
+
+        /// <summary>
+        /// Метод, вызываемый если корабль погиб и игра окончена
+        /// </summary>
+        public static void Finish()
+        {
+            _timer.Stop();
+            Buffer.Graphics.DrawString("THE END", new Font(FontFamily.GenericSansSerif, 60, FontStyle.Underline), Brushes.White, 300, 150);
+            Buffer.Render();
         }
     }
 }

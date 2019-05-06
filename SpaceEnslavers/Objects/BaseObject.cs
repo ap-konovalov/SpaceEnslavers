@@ -20,6 +20,8 @@ namespace SpaceEnslavers
 
         protected Size Size;
 
+        public delegate void Message();
+
         /// <summary>
         /// Конструктор  базового объекта
         /// </summary>

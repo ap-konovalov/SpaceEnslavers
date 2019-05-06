@@ -10,6 +10,9 @@ namespace SpaceEnslavers.Objects
         private int _energy = 100;
         public int Energy => _energy;
 
+        //Статическое событие гибели корабля
+        public static event Message MessageDie;
+
         public void EnergyLow(int n)
         {
             _energy -= n;
@@ -38,7 +41,7 @@ namespace SpaceEnslavers.Objects
         {
             if (Position.Y > 0)
             {
-                Position.Y = Position.Y + Dir.Y;
+                Position.Y = Position.Y - Dir.Y;
             }
         }
 
@@ -49,12 +52,14 @@ namespace SpaceEnslavers.Objects
         {
             if (Position.Y < Game.Height)
             {
-                Position.Y = Position.Y - Dir.Y;
+                Position.Y = Position.Y + Dir.Y;
             }
         }
 
         public void Die()
         {
+            //вызываем событие гибели корабля, т.е. делегат MessageDie
+            MessageDie?.Invoke();
         }
     }
 }

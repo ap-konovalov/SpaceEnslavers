@@ -21,7 +21,7 @@ namespace SpaceEnslavers.Objects
 
         public override void Draw()
         {
-            Game.Buffer.Graphics.FillEllipse(Brushes.White, Position.X, Position.Y, Size.Width, Size.Height);
+            Game.Buffer.Graphics.FillEllipse(Brushes.Orange, Position.X, Position.Y, Size.Width, Size.Height);
         }
 
         public override void Update()
