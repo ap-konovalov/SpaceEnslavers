@@ -10,11 +10,11 @@ namespace SpaceEnslavers.Objects
     /// <summary>
     /// Объект астероид 
     /// </summary>
-    class Asteroid : BaseObject
+    class Asteroid : BaseObject, ICloneable, Asteroid.IComparable<Asteroid>
     {
-        public int Power { get; set; }
+        public int Power { get; set; } = 3;
 
-        public Asteroid(Point pos, Point dir, Size size): base(pos,dir,size)
+        public Asteroid(Point pos, Point dir, Size size) : base(pos, dir, size)
         {
             Power = 1;
         }
@@ -38,6 +38,43 @@ namespace SpaceEnslavers.Objects
         {
             Game.Buffer.Graphics.FillEllipse(Brushes.White, Position.X, Position.Y, Size.Width, Size.Height);
         }
-          
+
+        /// <summary>
+        /// Создает клон объекта астероид. Реализуем интерфейс IClonable
+        /// </summary>
+        /// <returns>объект астероид</returns>
+        public object Clone()
+        {
+            Asteroid asteroid = new Asteroid(new Point(Position.X, Position.Y), new Point(Dir.X, Dir.Y),
+                new Size(Size.Width, Size.Height)) {Power = Power};
+            return asteroid;
+        }
+
+        /// <summary>
+        /// Обощенный интерфейс сравнения 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public interface IComparable<T>
+        {
+            int CompareTo(T obj);
+        }
+        
+        /// <summary>
+        /// Реализуем интерфейс IComparable для сравнения двух астероидов
+        /// </summary>
+        /// <param name="asteroid_2">Астероид</param>
+        /// <returns>Больщий астероид</returns>
+        int IComparable<Asteroid>.CompareTo(Asteroid asteroid_2)
+        {
+            if (Power > asteroid_2.Power)
+            {
+                return 1;
+            }
+            if (Power < asteroid_2.Power)
+            {
+                return -1;
+            }
+            return 0;
+        }
     }
 }
