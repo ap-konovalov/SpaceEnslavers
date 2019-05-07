@@ -10,7 +10,11 @@ namespace SpaceEnslavers.Objects
     class Ship : BaseObject
     {
         private int _energy = 100;
-        public int Energy => _energy;
+        public int Energy
+        {
+            get => _energy;
+            set => _energy = value;
+        }
 
         //Статическое событие гибели корабля
         public static event Message MessageDie;
@@ -19,6 +23,22 @@ namespace SpaceEnslavers.Objects
         {
             _energy -= n;
         }
+
+        public void EnergyRecovery(int health)
+        {
+            if (Energy <= 90)
+            {
+                Energy += health;
+                Console.WriteLine($"Аптечка. +{health} здоровья");
+            }
+
+            if (Energy >= 90 && Energy < 100)
+            {
+                Energy = 100;
+                Console.WriteLine($"Аптечка. {Energy} здоровья");
+            }
+        }
+
 
         public Ship(Point position, Point dir, Size size) : base(position, dir, size)
         {

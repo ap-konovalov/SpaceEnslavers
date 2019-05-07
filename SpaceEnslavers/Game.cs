@@ -25,6 +25,9 @@ namespace SpaceEnslavers
         private static Asteroid[] _asteroids;
 
         public static Timer _timer = new Timer();
+
+        // аптечка
+        public static FirstAidKit _firstAidKit;
         
         //счетчик уничтоженных астероидов
         public static int DestroyedAsteroids { get; set; } = 0;
@@ -51,8 +54,11 @@ namespace SpaceEnslavers
             //нарисуем снаряд
             _bullet = new Bullet(new Point(0, 200), new Point(5, 0), new Size(4, 1));
 
-            //Создадим астероиды
+            //создадим астероиды
             _asteroids = new Asteroid[3];
+            
+            //создадим аптечку
+            _firstAidKit = new FirstAidKit(new Point(Game.Width , 200), new Point(5, 0), new Size(20, 20));
 
             var rnd = new Random();
 
@@ -78,7 +84,6 @@ namespace SpaceEnslavers
 
             _context = BufferedGraphicsManager.Current;
             g = form.CreateGraphics();
-
 
             Width = form.ClientSize.Width;
             Height = form.ClientSize.Height;
@@ -139,7 +144,7 @@ namespace SpaceEnslavers
 
             // вызвали метод отрисовки для снаряда
             _bullet?.Draw();
-
+            
             //отрисовали все астероиды
             foreach (Asteroid item in _asteroids)
             {
@@ -148,6 +153,10 @@ namespace SpaceEnslavers
 
             //отрисовали корабль
             _ship.Draw();
+            
+            //отрисовка аптечки
+            _firstAidKit.Draw();
+            
             //отрисовали здоровье корабля
             if (_ship != null)
             {
@@ -155,7 +164,7 @@ namespace SpaceEnslavers
                 Buffer.Graphics.DrawString("Asteroids: " + DestroyedAsteroids , SystemFonts.DefaultFont,
                     Brushes.White, 800, 40);
             }
-
+                        
             Buffer.Render();
         }
 
@@ -167,6 +176,15 @@ namespace SpaceEnslavers
             {
                 obj.Update();
             }
+            
+            //если корабль столкнулся с аптечкой и у него меньше 100 здоробья - аптечка лечит кораболь. Сама аптечка потом регенерируется в любом месте
+            if (_firstAidKit.Collision(_ship))
+            {
+                var rnd = new Random();
+                _ship.EnergyRecovery(10);
+                _firstAidKit = new FirstAidKit(new Point(Game.Width , rnd.Next(20, Height - 10)), new Point(5, 0), new Size(20, 20));
+            }
+            _firstAidKit.Update();
 
             for (var i = 0; i < _asteroids.Length; i++)
             {
@@ -193,7 +211,7 @@ namespace SpaceEnslavers
                     _asteroids[i].Die();
                     continue;
                 }
-
+            
                 if (!_ship.Collision(_asteroids[i]))
                 {
                     continue;
@@ -214,9 +232,11 @@ namespace SpaceEnslavers
                     _ship?.Die();
                 }
             }
-
+            
             //Обновляем позицию снаряда
             _bullet.Update();
+            
+            //обновляем позицию аптечки
 
             CheckScreenSize();
         }
