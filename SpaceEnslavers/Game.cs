@@ -33,7 +33,7 @@ namespace SpaceEnslavers
         public static int DestroyedAsteroids { get; set; } = 0;
 
         //Создаем космический корабль
-        private static Ship _ship = new Ship(new Point(10, 400), new Point(5, 5), new Size(10, 10));
+        private static Ship _ship = new Ship(new Point(10, 400), new Point(5, 5), new Size(30, 30), "SmallShip");
 
         static Game()
         {
@@ -114,7 +114,7 @@ namespace SpaceEnslavers
             //При нажатии Ctrl астероид выпускает снаряд
             if (e.KeyCode == Keys.ControlKey)
             {
-                _bullet = new Bullet(new Point(_ship.Rectangle.X + 10, _ship.Rectangle.Y + 4), new Point(4, 0),
+                _bullet = new Bullet(new Point(_ship.Rectangle.X + 20, _ship.Rectangle.Y + 14), new Point(4, 0),
                     new Size(4, 1));
                 SystemSounds.Beep.Play();
             }
@@ -151,12 +151,18 @@ namespace SpaceEnslavers
                 item?.Draw();
             }
 
+            //TODO: Менять кораболь когда собьешь определенное количество астероидов 
+//            if (DestroyedAsteroids == 1)
+//            {
+//                _ship = new Ship(new Point(10, 400), new Point(5, 5), new Size(30, 30), "MiddleShip");
+//            }
+            
             //отрисовали корабль
             _ship.Draw();
             
             //отрисовка аптечки
             _firstAidKit.Draw();
-            
+
             //отрисовали здоровье корабля
             if (_ship != null)
             {

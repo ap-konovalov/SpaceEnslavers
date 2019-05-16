@@ -9,6 +9,7 @@ namespace SpaceEnslavers.Objects
     /// </summary>
     class Ship : BaseObject
     {
+        private string _shipName;
         private int _energy = 100;
         public int Energy
         {
@@ -23,6 +24,9 @@ namespace SpaceEnslavers.Objects
         {
             _energy -= n;
         }
+        
+        Image SmallShip = Image.FromFile(@"..\..\small_ship.png");
+        Image MiddleShip = Image.FromFile(@"..\..\middle_ship.png");
 
         public void EnergyRecovery(int health)
         {
@@ -40,8 +44,9 @@ namespace SpaceEnslavers.Objects
         }
 
 
-        public Ship(Point position, Point dir, Size size) : base(position, dir, size)
+        public Ship(Point position, Point dir, Size size, string shipName) : base(position, dir, size)
         {
+            _shipName = shipName;
         }
 
         /// <summary>
@@ -49,7 +54,18 @@ namespace SpaceEnslavers.Objects
         /// </summary>
         public override void Draw()
         {
-            Game.Buffer.Graphics.FillEllipse(Brushes.Wheat, Position.X, Position.Y, Size.Width, Size.Height);
+            switch (_shipName)
+            {
+                case "SmallShip":
+                    Game.Buffer.Graphics.DrawImage(SmallShip, Position.X, Position.Y, Size.Width, Size.Height);
+                    break;
+                case "MiddleShip":
+                    Game.Buffer.Graphics.DrawImage(MiddleShip, Position.X, Position.Y, Size.Width, Size.Height);
+                    break;
+                default:
+                    Game.Buffer.Graphics.DrawImage(SmallShip, Position.X, Position.Y, Size.Width, Size.Height);
+                    break;
+            }
         }
 
         public override void Update()

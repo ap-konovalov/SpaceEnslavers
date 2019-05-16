@@ -15,7 +15,7 @@ namespace SpaceEnslavers
         // сюда сохраним название планеты, которую хотим нарисовать
         public string _planetName;
         // создадим картинку планеты
-        Image Earth = Image.FromFile(@"..\..\planet.png");
+        Image Earth = Image.FromFile(@"..\..\earth.png");
         public Planet(Point pos, Point dir, Size size, String PlanetName) : base(pos, dir, size)
         {
            _planetName = PlanetName;
