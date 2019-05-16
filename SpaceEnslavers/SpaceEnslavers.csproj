@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{EBD66B7F-EF4A-44EA-B865-AA4AAD6DB6D5}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>SpaceEnslavers</RootNamespace>
     <AssemblyName>SpaceEnslavers</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
@@ -57,8 +57,10 @@
     <Compile Include="Game.cs" />
     <Compile Include="Interfaces\ICollision.cs" />
     <Compile Include="Objects\Bullet.cs" />
+    <Compile Include="Objects\FirstAidKit.cs" />
     <Compile Include="Objects\GameObjectException.cs" />
     <Compile Include="Objects\Planet.cs" />
+    <Compile Include="Objects\Ship.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\Space.cs" />

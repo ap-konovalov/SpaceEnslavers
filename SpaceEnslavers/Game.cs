@@ -20,18 +20,29 @@ namespace SpaceEnslavers
 
         //переменная для снаряда
         private static Bullet _bullet;
+
         //массивчик с астероидами
         private static Asteroid[] _asteroids;
 
+        public static Timer _timer = new Timer();
+
+        // аптечка
+        public static FirstAidKit _firstAidKit;
+        
+        //счетчик уничтоженных астероидов
+        public static int DestroyedAsteroids { get; set; } = 0;
+
+        //Создаем космический корабль
+        private static Ship _ship = new Ship(new Point(10, 400), new Point(5, 5), new Size(10, 10));
+
         static Game()
-        { 
+        {
         }
 
         public static BaseObject[] _objs;
 
         public static void Load()
         {
-
             _objs = new BaseObject[30];
 
             //нарисуем фон
@@ -43,8 +54,11 @@ namespace SpaceEnslavers
             //нарисуем снаряд
             _bullet = new Bullet(new Point(0, 200), new Point(5, 0), new Size(4, 1));
 
-            //Создадим астероиды
+            //создадим астероиды
             _asteroids = new Asteroid[3];
+            
+            //создадим аптечку
+            _firstAidKit = new FirstAidKit(new Point(Game.Width , 200), new Point(5, 0), new Size(20, 20));
 
             var rnd = new Random();
 
@@ -52,23 +66,24 @@ namespace SpaceEnslavers
             for (int i = 2; i < _objs.Length; i++)
             {
                 int random = rnd.Next(5, 50);
-                _objs[i] = new Star(new Point(20, rnd.Next(0, Game.Height)), new Point(-random, random), new Size(3, 3));
+                _objs[i] = new Star(new Point(20, rnd.Next(0, Game.Height)), new Point(-random, random),
+                    new Size(3, 3));
             }
 
             for (var i = 0; i < _asteroids.Length; i++)
             {
                 int random = rnd.Next(5, 50);
-                _asteroids[i] = new Asteroid(new Point(100, rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
+                _asteroids[i] = new Asteroid(new Point(100, rnd.Next(0, Game.Height)), new Point(-random / 5, random),
+                    new Size(random, random));
             }
-
         }
+
         internal static void Init(Form form)
         {
             Graphics g;
 
             _context = BufferedGraphicsManager.Current;
             g = form.CreateGraphics();
-
 
             Width = form.ClientSize.Width;
             Height = form.ClientSize.Height;
@@ -77,10 +92,46 @@ namespace SpaceEnslavers
 
             Load();
 
-            Timer timer = new Timer { Interval = 100 };
-            timer.Start();
-            timer.Tick += Timer_Tick;
+            //Timer timer = new Timer { Interval = 100 };
+            _timer.Start();
+            _timer.Tick += Timer_Tick;
+
+            // Обработчик событий нажатия на кнопку, вызывающий при нажатии метод Form_KeyDown
+            form.KeyDown += Form_KeyDown;
+            // подписались на делегата MessageDie в классе Ship. Когда у корабля будет 0 жизней выховется метод Die в котором сработает событие MessageDie и мы выполним метод Finish 
+            Ship.MessageDie += Finish;
+            //При возникновении события AsteroidDie выполнится метод AsteroidDieLog
+            Asteroid.AsteroidDie += AsteroidDieLog;
         }
+
+        /// <summary>
+        /// Метод обработки нажатий на кнопки, вызывается обработчиком событй и выполняет различные действия в зависимости от того, какая кнопка нажата
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Form_KeyDown(object sender, KeyEventArgs e)
+        {
+            //При нажатии Ctrl астероид выпускает снаряд
+            if (e.KeyCode == Keys.ControlKey)
+            {
+                _bullet = new Bullet(new Point(_ship.Rectangle.X + 10, _ship.Rectangle.Y + 4), new Point(4, 0),
+                    new Size(4, 1));
+                SystemSounds.Beep.Play();
+            }
+
+            //При нажатии стрелки вверх выполнился метод Up экземпляра класса ship
+            if (e.KeyCode == Keys.Up)
+            {
+                _ship.Up();
+            }
+
+            //При нажатии стрелки вниз выполнился метод Down экземпляра класса ship
+            if (e.KeyCode == Keys.Down)
+            {
+                _ship.Down();
+            }
+        }
+
         public static void Draw()
         {
             Buffer.Graphics.Clear(Color.Black);
@@ -92,47 +143,100 @@ namespace SpaceEnslavers
             }
 
             // вызвали метод отрисовки для снаряда
-            _bullet.Draw();
-
+            _bullet?.Draw();
+            
             //отрисовали все астероиды
             foreach (Asteroid item in _asteroids)
             {
-                item.Draw();
+                item?.Draw();
             }
 
+            //отрисовали корабль
+            _ship.Draw();
+            
+            //отрисовка аптечки
+            _firstAidKit.Draw();
+            
+            //отрисовали здоровье корабля
+            if (_ship != null)
+            {
+                Buffer.Graphics.DrawString("Energy: " + _ship.Energy, SystemFonts.DefaultFont, Brushes.White, 800, 20);
+                Buffer.Graphics.DrawString("Asteroids: " + DestroyedAsteroids , SystemFonts.DefaultFont,
+                    Brushes.White, 800, 40);
+            }
+                        
             Buffer.Render();
         }
-        
-        
+
+
         public static void Update()
         {
-            var rnd = new Random();
             // обновляем позицию фона звезд и планеты
             foreach (BaseObject obj in _objs)
             {
                 obj.Update();
             }
             
-            //нужно чтобы понимать с каким астероидом столкнулся снаряд и перересовать его
-            int currentAsteroid = 0;
-            // обновляем позицию астероидов
-            foreach (Asteroid asteroid in _asteroids)
+            //если корабль столкнулся с аптечкой и у него меньше 100 здоробья - аптечка лечит кораболь. Сама аптечка потом регенерируется в любом месте
+            if (_firstAidKit.Collision(_ship))
             {
-                asteroid.Update();
-             
-                //если астероид столкнулся с выстрелом воспроизводим звук
-                if (asteroid.Collision(_bullet))
+                var rnd = new Random();
+                _ship.EnergyRecovery(10);
+                _firstAidKit = new FirstAidKit(new Point(Game.Width , rnd.Next(20, Height - 10)), new Point(5, 0), new Size(20, 20));
+            }
+            _firstAidKit.Update();
+
+            for (var i = 0; i < _asteroids.Length; i++)
+            {
+                var rnd = new Random();
+
+                if (_asteroids[i] == null)
+                {
+                    continue;
+                }
+
+                _asteroids[i].Update();
+
+                //Если снаряд попал в астероид рисуем новый рандомный астероид
+                if (_bullet != null && _bullet.Collision(_asteroids[i]))
                 {
                     SystemSounds.Hand.Play();
-                    //вместо столкнувшегося астероида рисуем новый
                     int random = rnd.Next(5, 50);
-                    _asteroids[currentAsteroid] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)), new Point(-random / 5, random), new Size(random, random));
-                }
-                currentAsteroid++;
-            }
+                    _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)),
+                        new Point(-random / 5, random), new Size(random, random));
+                    //добавим в счетчик астероидов сбитый астероид
+                   DestroyedAsteroids++;
 
+                    //вызовем метод который вызовет событие гибели астероида на которое мы подпишемся
+                    _asteroids[i].Die();
+                    continue;
+                }
+            
+                if (!_ship.Collision(_asteroids[i]))
+                {
+                    continue;
+                }
+
+                // при столкновении астероида с кораблем, вычитаем у корабля от 1 до 10 жизней
+                var damage = rnd.Next(1, 10);
+                _ship?.EnergyLow(damage);
+                SystemSounds.Asterisk.Play();
+                //занесем информацию о столкновении в консоль
+                _ship?.ShipDamageLog(damage);
+
+                //если у коробля заканчиваются жизни он умирает
+                if (_ship.Energy <= 0)
+                {
+                    //когда корабль разбился, обнулим счетчик сбитых астероидов
+                   DestroyedAsteroids = 0 ;
+                    _ship?.Die();
+                }
+            }
+            
             //Обновляем позицию снаряда
             _bullet.Update();
+            
+            //обновляем позицию аптечки
 
             CheckScreenSize();
         }
@@ -142,7 +246,7 @@ namespace SpaceEnslavers
             Draw();
             Update();
         }
-        
+
         /// <summary>
         /// Функция проверки размера игровой формы. Если размер формы < 0 или > 1000 по шиоине или высоте - выбрасывает исключение
         /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -154,8 +258,26 @@ namespace SpaceEnslavers
             //Если размер формы не соответствует заданным выбасываем исключение
             if (currentWidth > 1000 || currentWidth < 0 || currntHeight > 1000 || currntHeight < 0)
             {
-             throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException();
             }
+        }
+
+        /// <summary>
+        /// Метод, вызываемый если корабль погиб и игра окончена
+        /// </summary>
+        public static void Finish()
+        {
+            _timer.Stop();
+            Console.WriteLine("Корабль уничтожен");
+            Buffer.Graphics.DrawString("THE END", new Font(FontFamily.GenericSansSerif, 60, FontStyle.Underline),
+                Brushes.White, 300, 150);
+            Buffer.Render();
+        }
+
+        //логируем в консоли гибель астероидов
+        public static void AsteroidDieLog()
+        {
+            Console.WriteLine("Астероид уничтожен");
         }
     }
 }
