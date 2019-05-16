@@ -1,11 +1,9 @@
 ﻿using SpaceEnslavers.Objects;
 using System;
-using System.Collections;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Media;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
+using System.Collections.Generic;
 
 namespace SpaceEnslavers
 {
@@ -20,6 +18,7 @@ namespace SpaceEnslavers
 
         //переменная для снаряда
         private static Bullet _bullet;
+        public static List<Bullet> _Bullets = new List<Bullet>();
 
         //массивчик с астероидами
         private static Asteroid[] _asteroids;
@@ -28,7 +27,7 @@ namespace SpaceEnslavers
 
         // аптечка
         public static FirstAidKit _firstAidKit;
-        
+
         //счетчик уничтоженных астероидов
         public static int DestroyedAsteroids { get; set; } = 0;
 
@@ -52,13 +51,13 @@ namespace SpaceEnslavers
             _objs[1] = new Planet(new Point(20, 20), new Point(10, 10), new Size(5, 5), "Earth");
 
             //нарисуем снаряд
-            _bullet = new Bullet(new Point(0, 200), new Point(5, 0), new Size(4, 1));
+            //   _bullet = new Bullet(new Point(0, 200), new Point(5, 0), new Size(4, 1));
 
             //создадим астероиды
             _asteroids = new Asteroid[3];
-            
+
             //создадим аптечку
-            _firstAidKit = new FirstAidKit(new Point(Game.Width , 200), new Point(5, 0), new Size(20, 20));
+            _firstAidKit = new FirstAidKit(new Point(Game.Width, 200), new Point(5, 0), new Size(20, 20));
 
             var rnd = new Random();
 
@@ -114,8 +113,8 @@ namespace SpaceEnslavers
             //При нажатии Ctrl астероид выпускает снаряд
             if (e.KeyCode == Keys.ControlKey)
             {
-                _bullet = new Bullet(new Point(_ship.Rectangle.X + 20, _ship.Rectangle.Y + 14), new Point(4, 0),
-                    new Size(4, 1));
+                _Bullets.Add(new Bullet(new Point(_ship.Rectangle.X + 20, _ship.Rectangle.Y + 14), new Point(4, 0),
+                    new Size(4, 1)));
                 SystemSounds.Beep.Play();
             }
 
@@ -143,8 +142,11 @@ namespace SpaceEnslavers
             }
 
             // вызвали метод отрисовки для снаряда
-            _bullet?.Draw();
-            
+            foreach (var bullet in _Bullets)
+            {
+                bullet.Draw();
+            }
+
             //отрисовали все астероиды
             foreach (Asteroid item in _asteroids)
             {
@@ -156,10 +158,10 @@ namespace SpaceEnslavers
 //            {
 //                _ship = new Ship(new Point(10, 400), new Point(5, 5), new Size(30, 30), "MiddleShip");
 //            }
-            
+
             //отрисовали корабль
             _ship.Draw();
-            
+
             //отрисовка аптечки
             _firstAidKit.Draw();
 
@@ -167,10 +169,10 @@ namespace SpaceEnslavers
             if (_ship != null)
             {
                 Buffer.Graphics.DrawString("Energy: " + _ship.Energy, SystemFonts.DefaultFont, Brushes.White, 800, 20);
-                Buffer.Graphics.DrawString("Asteroids: " + DestroyedAsteroids , SystemFonts.DefaultFont,
+                Buffer.Graphics.DrawString("Asteroids: " + DestroyedAsteroids, SystemFonts.DefaultFont,
                     Brushes.White, 800, 40);
             }
-                        
+
             Buffer.Render();
         }
 
@@ -182,14 +184,16 @@ namespace SpaceEnslavers
             {
                 obj.Update();
             }
-            
+
             //если корабль столкнулся с аптечкой и у него меньше 100 здоробья - аптечка лечит кораболь. Сама аптечка потом регенерируется в любом месте
             if (_firstAidKit.Collision(_ship))
             {
                 var rnd = new Random();
                 _ship.EnergyRecovery(10);
-                _firstAidKit = new FirstAidKit(new Point(Game.Width , rnd.Next(20, Height - 10)), new Point(5, 0), new Size(20, 20));
+                _firstAidKit = new FirstAidKit(new Point(Game.Width, rnd.Next(20, Height - 10)), new Point(5, 0),
+                    new Size(20, 20));
             }
+
             _firstAidKit.Update();
 
             for (var i = 0; i < _asteroids.Length; i++)
@@ -203,21 +207,27 @@ namespace SpaceEnslavers
 
                 _asteroids[i].Update();
 
-                //Если снаряд попал в астероид рисуем новый рандомный астероид
-                if (_bullet != null && _bullet.Collision(_asteroids[i]))
+                for (int j = 0; j < _Bullets.Count; j++)
                 {
-                    SystemSounds.Hand.Play();
-                    int random = rnd.Next(5, 50);
-                    _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)),
-                        new Point(-random / 5, random), new Size(random, random));
-                    //добавим в счетчик астероидов сбитый астероид
-                   DestroyedAsteroids++;
+                    if (_asteroids[i] != null && _Bullets[j].Collision(_asteroids[i]))
+                    {
+                        SystemSounds.Hand.Play();
+                        //Если снаряд попал в астероид рисуем новый рандомный астероид
+                        int random = rnd.Next(5, 50);
+                        _asteroids[i] = new Asteroid(new Point(rnd.Next(0, Game.Width), rnd.Next(0, Game.Height)),
+                            new Point(-random / 5, random), new Size(random, random));
+                        //добавим в счетчик астероидов сбитый астероид
+                        DestroyedAsteroids++;
 
-                    //вызовем метод который вызовет событие гибели астероида на которое мы подпишемся
-                    _asteroids[i].Die();
-                    continue;
+                        //вызовем метод который вызовет событие гибели астероида на которое мы подпишемся
+                        _asteroids[i].Die();
+                        //Удалим из очереди снарядов тот снаряд, который попал в астероид                      
+                        _Bullets.RemoveAt(j);
+                        j--;
+                    }
                 }
-            
+
+
                 if (!_ship.Collision(_asteroids[i]))
                 {
                     continue;
@@ -234,14 +244,17 @@ namespace SpaceEnslavers
                 if (_ship.Energy <= 0)
                 {
                     //когда корабль разбился, обнулим счетчик сбитых астероидов
-                   DestroyedAsteroids = 0 ;
+                    DestroyedAsteroids = 0;
                     _ship?.Die();
                 }
             }
-            
+
             //Обновляем позицию снаряда
-            _bullet.Update();
-            
+            foreach (var bullet in _Bullets)
+            {
+                bullet.Update();
+            }
+
             //обновляем позицию аптечки
 
             CheckScreenSize();
